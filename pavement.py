@@ -1,9 +1,11 @@
+import os
 import sys
 from pprint import pprint
 
 from paver.easy import task, needs, path
 from paver.setuputils import setup, find_package_data
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import version
 
 avr_helpers_files = find_package_data(package='avr_helpers',

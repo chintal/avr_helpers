@@ -6,3 +6,7 @@ RELEASE-VERSION
 */Arduino/*/Config.h
 .sconsign.dblite
 *.o
+.idea
+dist
+paver-minilib.zip
+setup.py
