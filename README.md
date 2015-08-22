@@ -15,8 +15,11 @@ The `avr_helpers.AvrDude` class implements an API for:
 
  - Scanning available serial ports for a connected device.
  - Flashing a `.hex` bit-stream file to an AVR device.
+ - Reading the signature of an AVR device.
 
 ### `AvrDude` API Usage ###
+
+#### Flashing a `.hex` file to an AVR device ####
 
     >>> from avr_helpers import AvrDude
     >>> AvrDude?
@@ -58,3 +61,10 @@ The `avr_helpers.AvrDude` class implements an API for:
 Note that since the `avrdude.conf` file from the Arduino IDE is included in the
 `avr_helpers` package, the `arduino` protocol may be used, allowing easy
 flashing of pre-compiled `.hex` files to Arduino devices.
+
+#### Reading the Signature of an AVR device ####
+
+    >>> from avr_helpers import AvrDude
+    >>> avr_dude = AvrDude(‘arduino’, ‘atmega168’, ‘19200’)
+    >>> print avrdude.read_signature()
+    0x1e9406

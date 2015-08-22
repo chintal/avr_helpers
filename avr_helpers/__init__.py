@@ -34,8 +34,9 @@ class FirmwareError(Exception):
 
 
 class AvrDude(SerialDevice):
-    def __init__(self, protocol, microcontroller, baud_rate, conf_path=None,
-                 port=None):
+    def __init__(self, protocol, microcontroller, baud_rate,
+                 conf_path=None, port=None):
+        super(AvrDude, self).__init__()
         self.protocol = protocol
         self.microcontroller = microcontroller
         self.baud_rate = baud_rate
@@ -86,19 +87,42 @@ class AvrDude(SerialDevice):
         if extra_flags is not None:
             flags.extend(extra_flags)
 
+        cwd = os.getcwd()
         try:
-            cwd = os.getcwd()
             os.chdir(hex_path.parent)
             stdout, stderr = self._run_command(flags)
         finally:
             os.chdir(cwd)
         return stdout, stderr
 
+    @staticmethod
+    def _process_signature(out):
+        for line in out.splitlines():
+            if "Device signature = " in line:
+                logger.debug("Found signature in : " + line)
+                signature = line.split(' ')[-1]
+                logger.info("AVR Signature : " + signature)
+                return signature
+        raise ConnectionError
+
+    def read_signature(self, extra_flags=None):
+        flags = ['-c', self.protocol, '-b', str(self.baud_rate), '-p',
+                 self.microcontroller, '-P', '%s' % self.port, '-U',
+                 'signature:r:-:h', '-C', '%(avrconf)s']
+        if extra_flags is not None:
+            flags.extend(extra_flags)
+
+        try:
+            stdout, stderr = self._run_command(flags)
+        except ConnectionError, e:
+            stderr = e.args[0]
+        return self._process_signature(stderr)
+
     def test_connection(self, port, baud_rate):
-        '''
+        """
         This method is called by the `get_port` method for each available
         serial-port on the system until a value of `True` is returned.
-        '''
+        """
         flags = ['-c', self.protocol, '-b', str(baud_rate), '-p',
                  self.microcontroller, '-P', port, '-C', '%(avrconf)s', '-n']
         try:
